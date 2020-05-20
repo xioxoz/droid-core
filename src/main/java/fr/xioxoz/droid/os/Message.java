@@ -4,7 +4,11 @@
 
 package fr.xioxoz.droid.os;
 
-public class Message {
+/**
+ * Defines a message containing a description and arbitrary data object that can be
+ * sent to a {@link Handler}.
+ */
+public class Message<T> {
     /**
      * User-defined message code so that the recipient can identify
      * what this message is about. Each {@link Handler} has its own name-space
@@ -12,6 +16,11 @@ public class Message {
      * with other handlers.
      */
     public int what;
+
+    /**
+     * The user payload the message is carrying.
+     */
+    public T payload;
 
     /**
      * Handler this message must be delivered to.
@@ -28,6 +37,11 @@ public class Message {
         return this;
     }
 
+    public Message withPayload(T payload) {
+        this.payload = payload;
+        return this;
+    }
+
     Message withTarget(Handler target) {
         this.target = target;
         return this;
@@ -35,7 +49,7 @@ public class Message {
 
     private Message() {}
 
-    public static Message aMessage() {
+    public static Message obtain() {
         return new Message();
     }
 }

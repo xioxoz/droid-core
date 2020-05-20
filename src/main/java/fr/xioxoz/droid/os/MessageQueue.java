@@ -6,25 +6,40 @@ package fr.xioxoz.droid.os;
 
 import java.util.LinkedList;
 
-// A MessageQueue is queue of Messages ordered by their "when" timestamp.
-// The interface/implementation is inspired from the android.os.MessageQueue
-// provided by Android Open Source Project.
+/**
+ * A MessageQueue is queue of Messages ordered by their "when" timestamp.
+ * The interface/implementation is inspired from the android.os.MessageQueue
+ * provided by Android Open Source Project.
+ */
 public class MessageQueue {
 
-    // The list of messages currently in the queue.
+    /**
+     * The list of messages currently in the queue.
+     */
     private final LinkedList<Message> messages = new LinkedList<>();
 
-    // Tells if a message is immediately available in the queue.
-    // Returns true when the queue will immediately return a
-    // Message if "next()" is called.
+    /**
+     * True when the queue is quitting.
+     */
+    private boolean quitting;
+
+    public MessageQueue() {}
+
+    /**
+     * Tells if a message is immediately available in the queue.
+     * Returns true when the queue will immediately return a
+     * Message if "next()" is called.
+     */
     public synchronized boolean isIdle() {
         final long now = System.currentTimeMillis();
         return messages.isEmpty() || now < messages.getFirst().when;
     }
 
-    // Provides the next available message in the queue. As messages are
-    // ordered and delivered according to their "when" value, the call may
-    // block until the next message is available.
+    /**
+     * Provides the next available message in the queue. As messages are
+     * ordered and delivered according to their "when" value, the call may
+     * block until the next message is available.
+     */
     public synchronized Message next() {
         long nextWaitingTime = 0L;
 
@@ -45,14 +60,21 @@ public class MessageQueue {
                 // There's a message, deliver it.
                 return messages.removeFirst();
             }
+
+            // The queue is quitting and we have no more messages to deliver.
+            if (nextWaitingTime == -1L && quitting) {
+                return null;
+            }
         }
     }
 
-    // Wait for a period of time provided by the <time> parameter.
-    // It blocks the following ways:
-    //  - if time > 0, it waits for time ms,
-    //  - if time == 0, it doesn't wait,
-    //  - if time < 0, it waits until until someone notifies.
+    /**
+     * Wait for a period of time provided by the <time> parameter.
+     * It blocks the following ways:
+     *  - if time > 0, it waits for time ms,
+     *  - if time == 0, it doesn't wait,
+     *  - if time < 0, it waits until until someone notifies.
+     */
     private void waitForMessagesLocked(long time) {
         try {
             if (time == 0) {
@@ -69,14 +91,22 @@ public class MessageQueue {
         }
     }
 
-    // Adds a message <m> to the queue using <when> to insert the message at
-    // the right place in the queue.
+    /**
+     * Adds a message <m> to the queue using <when> to insert the message at
+     * the right place in the queue.
+     */
     boolean enqueueMessage(Message m, long when) {
         if (m.target == null) {
             throw new IllegalArgumentException("can't enqueue Message without target Handler");
         }
 
         synchronized (this) {
+            if (quitting) {
+                // The queue is in quitting state, we won't accept new messages
+                // and wait for the looper to empty us.
+                return false;
+            }
+
             m.when = when;
             if (when == 0 || messages.isEmpty() || when < messages.getFirst().when) {
                 messages.addFirst(m);
@@ -98,8 +128,10 @@ public class MessageQueue {
         return true;
     }
 
-    // Tells if a message described by the target <h> and the subject <what>
-    // in the queue.
+    /**
+     * Tells if a message described by the target <h> and the subject <what>
+     * in the queue.
+     */
     synchronized boolean hasMessages(Handler h, int what) {
         if (h == null) {
             return false;
@@ -116,7 +148,9 @@ public class MessageQueue {
         return false;
     }
 
-    // Tells if a message described by the target <h> in the queue.
+    /**
+     * Tells if a message described by the target <h> in the queue.
+     */
     synchronized boolean hasMessages(Handler h) {
         if (h == null) {
             return false;
@@ -131,8 +165,10 @@ public class MessageQueue {
         return false;
     }
 
-    // Removes the messages described by the target <h> and the subject <what>
-    // from the queue.
+    /**
+     * Removes the messages described by the target <h> and the subject <what>
+     * from the queue.
+     */
     synchronized void removeMessages(Handler h, int what) {
         if (h == null) {
             throw new IllegalArgumentException("can't remove Message(s) without target handler");
@@ -141,9 +177,8 @@ public class MessageQueue {
         messages.removeIf(m -> m.target == h && m.what == what);
     }
 
-    private MessageQueue() {}
-
-    public static MessageQueue aQueue() {
-        return new MessageQueue();
+    synchronized void quit() {
+        quitting = true;
+        notifyAll();
     }
 }
