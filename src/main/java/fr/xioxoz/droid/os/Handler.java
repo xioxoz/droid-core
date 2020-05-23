@@ -75,6 +75,10 @@ public class Handler {
         sendMessageAtTime(m, System.currentTimeMillis()+delay);
     }
 
+    public final void sendMessageAtFrontOfQueue(Message m) {
+        sendMessageAtTime(m, 0l);
+    }
+
     public final void sendMessageAtTime(Message m, long time) {
         if (time < 0) {
             throw new IllegalArgumentException("can't send message with negative time");

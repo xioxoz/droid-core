@@ -16,8 +16,7 @@ import java.util.concurrent.BlockingQueue;
 
 import static com.vmware.lmock.masquerade.Schemer.begin;
 import static com.vmware.lmock.masquerade.Schemer.end;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class HandlerTest {
 
@@ -179,5 +178,34 @@ public class HandlerTest {
         final long when = System.currentTimeMillis() + delay;
         handler.sendMessageDelayed(m, delay);
         assertTrue(queue.take() >= when);
+    }
+
+    @Test
+    public void testSendMessageAtFrontOfQueue() throws InterruptedException {
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
+
+        handler = new Handler(thread.getLooper(), null) {
+            @Override
+            void handleMessage(Message m) {
+                try {
+                    queue.put(m.what);
+                } catch (InterruptedException e) {
+                    // Bad
+                }
+            }
+        };
+
+        Message m;
+        m = handler.obtainMessage(1);
+        handler.sendMessage(m);
+        m = handler.obtainMessage(2);
+        handler.sendMessage(m);
+        m = handler.obtainMessage(3);
+        handler.sendMessageAtFrontOfQueue(m);
+
+        assertEquals(3, (int)queue.take());
+        assertEquals(1, (int)queue.take());
+        assertEquals(2, (int)queue.take());
+
     }
 }
