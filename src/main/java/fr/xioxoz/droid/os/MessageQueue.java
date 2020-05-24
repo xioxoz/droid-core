@@ -111,6 +111,9 @@ public class MessageQueue {
             if (when == 0 || messages.isEmpty() || when < messages.getFirst().when) {
                 messages.addFirst(m);
 
+            } else if (when >= messages.getLast().when) {
+                messages.addLast(m);
+
             } else {
                 // Insert the element at the right position in the list.
                 int pos = 0;
