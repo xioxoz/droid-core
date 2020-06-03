@@ -4,7 +4,7 @@
 
 package fr.xioxoz.droid.os;
 
-public class Handler {
+public class Handler implements Messenger {
 
     /**
      * The Looper (thread) behind this handler.
@@ -54,7 +54,7 @@ public class Handler {
         handleMessage(m);
     }
 
-    void handleMessage(Message m) {}
+    protected void handleMessage(Message m) {}
 
     public Message obtainMessage() {
         return Message.obtain()

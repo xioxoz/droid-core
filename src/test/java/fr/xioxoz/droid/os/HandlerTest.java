@@ -105,7 +105,7 @@ public class HandlerTest {
     public void testExtendedHandler() throws InterruptedException {
         handler = new Handler(thread.getLooper(), null) {
             @Override
-            void handleMessage(Message m) {
+            protected void handleMessage(Message m) {
                 callback.handleMessage(m);
             }
         };
@@ -130,7 +130,7 @@ public class HandlerTest {
 
         handler = new Handler(thread.getLooper(), null) {
             @Override
-            void handleMessage(Message m) {
+            protected void handleMessage(Message m) {
                 try {
                     queue.put(System.currentTimeMillis());
                 } catch (InterruptedException e) {
@@ -164,7 +164,7 @@ public class HandlerTest {
 
         handler = new Handler(thread.getLooper(), null) {
             @Override
-            void handleMessage(Message m) {
+            protected void handleMessage(Message m) {
                 try {
                     queue.put(System.currentTimeMillis());
                 } catch (InterruptedException e) {
@@ -186,7 +186,7 @@ public class HandlerTest {
 
         handler = new Handler(thread.getLooper(), null) {
             @Override
-            void handleMessage(Message m) {
+            protected void handleMessage(Message m) {
                 try {
                     queue.put(m.what);
                 } catch (InterruptedException e) {

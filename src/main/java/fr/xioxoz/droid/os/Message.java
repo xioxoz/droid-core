@@ -47,9 +47,32 @@ public class Message<T> {
         return this;
     }
 
+    Message withWhen(long when) {
+        this.when = when;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "what=" + what +
+                ", payload=" + payload +
+                ", target=" + target +
+                ", when=" + when +
+                '}';
+    }
+
     private Message() {}
 
     public static Message obtain() {
         return new Message();
+    }
+
+    public static Message copyFrom(Message m) {
+        return obtain()
+                .withWhat(m.what)
+                .withTarget(m.target)
+                .withPayload(m.payload)
+                .withWhen(m.when);
     }
 }
