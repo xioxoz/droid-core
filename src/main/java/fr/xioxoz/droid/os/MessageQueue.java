@@ -11,7 +11,7 @@ import java.util.LinkedList;
  * The interface/implementation is inspired from the android.os.MessageQueue
  * provided by Android Open Source Project.
  */
-public class MessageQueue {
+class MessageQueue {
 
     /**
      * The list of messages currently in the queue.
@@ -23,14 +23,14 @@ public class MessageQueue {
      */
     private boolean quitting;
 
-    public MessageQueue() {}
+    MessageQueue() {}
 
     /**
      * Tells if a message is immediately available in the queue.
      * Returns true when the queue will immediately return a
      * Message if "next()" is called.
      */
-    public synchronized boolean isIdle() {
+    synchronized boolean isIdle() {
         final long now = System.currentTimeMillis();
         return messages.isEmpty() || now < messages.getFirst().when;
     }
@@ -40,7 +40,7 @@ public class MessageQueue {
      * ordered and delivered according to their "when" value, the call may
      * block until the next message is available.
      */
-    public synchronized Message next() {
+    synchronized Message next() {
         long nextWaitingTime = 0L;
 
         for (;;) {

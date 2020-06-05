@@ -203,8 +203,10 @@ public class HandlerTest {
         m = handler.obtainMessage(3);
         handler.sendMessageAtFrontOfQueue(m);
 
-        assertEquals(3, (int)queue.take());
-        assertEquals(1, (int)queue.take());
+        int value = queue.take();
+        assertTrue(value == 1 || value == 3);
+        value = queue.take();
+        assertTrue(value == 1 || value == 3);
         assertEquals(2, (int)queue.take());
 
     }
